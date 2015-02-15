@@ -1,3 +1,4 @@
+from docutils.nodes import table
 import math
 import itertools
 
@@ -56,7 +57,33 @@ class TabuList:
         for i in range(0, len(self.tabu_list)):
             self.tabu_list[i].reduce_time()
 
+class RecentMemory:
+
+    def __init__(self, iterations, dimensions, initial_point):
+        self.num_iterations = iterations
+        self.recent_list = [0 for i in range(0, dimensions)]
+        self.previous_point = initial_point
+        print('Creating recent memory...')
+        print(self.recent_list)
+
+    def update(self, point):
+        #print(self.previous_point)
+        # if point's component is changed update list to 0 else increment
+        for i in range(0, len(self.previous_point)):
+            if self.previous_point[i] == point[i]:
+                self.recent_list[i] += 1
+            else:
+                self.recent_list[i] = 0
+        self.previous_point = point
+        print('Updating recent memory...')
+
+class LongTermMemory:
+    def __init__(self):
+        self.lista = []
+
 class TabuSearch:
+    intensify = False
+
     def __init__(self, problem, max_iter, options):
         self.problem = problem
         self.tabu_list = TabuList()
@@ -66,15 +93,25 @@ class TabuSearch:
         # print(self.find_accessible_points(self.find_neighbourhood()))
         if 'diversification' in options:
             self.diversify = True
-        if 'intrinsification' in options:
-            self.intrinsification = True
+        if 'intensify' in options:
+            self.intensify = True
+            self.recent_memory = RecentMemory(options[options.index('intensify') + 1], self.problem.dimension, self.problem.initial_point)
+
 
     def find_neighbourhood(self):
         neighbourhood = []
         # Find possible moves across each dimension
         changes = []
         for i in range(0, self.problem.dimension):
-            changes.append([self.problem.current_point[i] - 1, self.problem.current_point[i], self.problem.current_point[i] + 1])
+            if self.intensify:
+                print(self.recent_memory.recent_list)
+                if self.recent_memory.recent_list[i] > self.recent_memory.num_iterations:
+                    print('Postoji')
+                    changes.append([self.problem.current_point[i], self.problem.current_point[i], self.problem.current_point[i]])
+                else:
+                    changes.append([self.problem.current_point[i] - 1, self.problem.current_point[i], self.problem.current_point[i] + 1])
+            else:
+                changes.append([self.problem.current_point[i] - 1, self.problem.current_point[i], self.problem.current_point[i] + 1])
         # Find neighbourhood
         for r in itertools.product(*changes):
             # Don't add the current point to the neighbourhood
@@ -100,40 +137,44 @@ class TabuSearch:
         maximum_value = self.problem.objective_function(neighbourhood[0])
         for i in range(1, len(neighbourhood)):
             if not self.tabu_list.contains(neighbourhood[i]):
-                print("Current point: ", self.problem.current_point, " better: ", neighbourhood[i])
+                #print("Current point: ", self.problem.current_point, " better: ", neighbourhood[i])
                 maximum_point = neighbourhood[i]
                 maximum_value = self.problem.objective_function(neighbourhood[i])
-            if self.tabu_list.contains(neighbourhood[i]):
-                print("Point ", neighbourhood[i], " in tabu list!")
+            #if self.tabu_list.contains(neighbourhood[i]):
+                #print("Point ", neighbourhood[i], " in tabu list!")
         self.problem.current_point = maximum_point
         self.tabu_list.add(self.problem.current_point)
         if maximum_value > self.problem.objective_function(self.problem.best_point):
             self.problem.best_point = maximum_point
         self.tabu_list.refresh()
+        if self.intensify:
+            self.recent_memory.update(maximum_point)
         self.iteration += 1
 
 def f(x):
-    return x[0] + x[1]
+    return 8 * x[0] +  5 * x[1] + 3 * x[2] + 6 * x[3] + 4 * x[4]
 
 def c1(x):
-    return x[0] + x[1] <=6
+    return 2 * x[0] +  5 * x[1] + 1 * x[2] + 4 * x[3] + 3 * x[4] <= 17
 
 def c2(x):
-    return x[0] + x[1] >= -2
+    return x[0] >= 0 and x[1] >= 0 and x[2] >= 0 and x[3] >= 0 and x[4] >= 0
 
 def c3(x):
-    return x[1] <= 1 + x[0]
+    return x[0] <= 4 and x[1] <= 3 and x[2] <= 4 and x[3] <= 2 and x[4] <= 2
 
 def c4(x):
     return x[1] >= -4 + x[0]
 
-a = IntegerProblem('min', f, [0,0], [c1,c2,c3,c4])
+a = IntegerProblem('min', f, [0,0,0,0,0], [c1, c2, c3])
 
-tabu_search = TabuSearch(a,5, ['diversify'])
+tabu_search = TabuSearch(a,7, ['intensify', 4])
 while tabu_search.iteration < tabu_search.max_iter:
     tabu_search.next_iteration()
 print("Best solution:")
 print(tabu_search.problem.best_point)
+print("Objective funcion value:")
+print(tabu_search.problem.objective_function(tabu_search.problem.best_point))
 print("Current point: ", tabu_search.problem.current_point)
 print("Tabu list:")
 for i in range(0, len(tabu_search.tabu_list.tabu_list)):
