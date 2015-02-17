@@ -3,6 +3,7 @@ import math
 import itertools
 import matplotlib.pyplot as plt
 import numpy as np
+import time
 
 class IntegerProblem:
     def __init__(self, type, objective_function, initial_point, constraints):
@@ -25,7 +26,7 @@ class TabuItem:
     def __init__(self, point):
         self.point = point
         self.dimension = len(point)
-        self.time = 10
+        self.time = 8
 
     def __eq__(self, other):
         for i in range(0, self.dimension):
@@ -212,21 +213,42 @@ class TabuSearch:
         self.iteration += 1
 
 
-    def plot(self, axis, line_weight):
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
+    def plot(self, axis, line_weight, options):
+        #plt.cla()
+        #plt.close()
+        plt.ion()
+        plt.cla()
+
         x_points = [i for i in range(axis[0], axis[1])]
         y_points = [i for i in range(axis[2], axis[3])]
+        points = []
+        for i in range(0, len(x_points)):
+            for j in range(0, len(y_points)):
+                points.append([x_points[i], y_points[j]])
+        points = self.find_accessible_neighbourhood(points)
+        #ax.grid(True)
+        a=[[1,1]]
         #for i in range(0, len(x_points)):
             #for j n range(0, len(y_points)):
-        p = ax.plot(x_points, y_points, 'bo')
-        ax.set_xlabel('x-points')
-        ax.set_ylabel('y-points')
-        ax.set_title('Simple XY point plot')
-        plt.axis([0,20,0,20])
-        ax.plot(x_points, x_points, 'ro')
-        plt.show()
+        p = plt.plot(*zip(*points), marker='o', color='k', ls='')
+        tacka = [self.problem.current_point]
+        tabus = []
+        for i in range(0, len(self.tabu_list.tabu_list)):
+            tabus.append(self.tabu_list.tabu_list[i].point)
+        plt.plot(*zip(*tabus), marker='o', color='b', markerfacecolor='none', markersize=20, ls='')
+        plt.plot(*zip(*tacka), marker='o', color='r', markersize=15)
+        axis[0] = axis[0] - 1;
+        axis[1] = axis[1] + 1;
+        axis[2] = axis[2] - 1;
+        axis[3] = axis[3] + 1;
+        print(axis)
+        plt.axis(axis)
+        plt.draw()
 
+        #ax.plot(x_points, x_points, 'ro')
+        if 'delay' in options:
+            time.sleep(options[options.index('delay') + 1])
+        return plt
 
 # def f(x):
 #     return 8 * x[0] +  5 * x[1] + 3 * x[2] + 6 * x[3] + 4 * x[4]
@@ -257,15 +279,15 @@ def c3(x):
 
 a = IntegerProblem('max', f, [0,0], [c1, c2, c3])
 
-tabu_search = TabuSearch(a,50, ['diversify', 2, 1, 1])
+tabu_search = TabuSearch(a,12, [])
 while tabu_search.iteration < tabu_search.max_iter:
     tabu_search.next_iteration()
-#tabu_search.plot([-5, 5, -5, 5], 2)
+    plt = tabu_search.plot([0, 9, 0, 6], 2, ['delay', 0.5])
+plt.show()
 print("Best solution:")
 print(tabu_search.problem.best_point)
 print("Objective funcion value:")
-print(tabu_search.problem.objective_function(tabu_search.problem.best_point))
-print("Current point: ", tabu_search.problem.current_point)
-print("Tabu list:")
-for i in range(0, len(tabu_search.tabu_list.tabu_list)):
-    print(tabu_search.tabu_list.tabu_list[i].point, tabu_search.tabu_list.tabu_list[i].time)
+#print(tabu_search.problem.objective_function(tabu_search.problem.best_point))
+
+
+raw_input("Press ENTER to continue...")
