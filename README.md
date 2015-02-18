@@ -3,7 +3,11 @@ Python solver for integer programming problems using Tabu search.
 
 <a href="https://github.com/farisca/tabu_intprog/blob/master/seminarski-tabu_integer.pdf?raw=true">Documentation (in Bosnian)</a>
 
-Example of usage:
-An integer programming problem has to be create:d
+TabuSearch.py contains all the code.
 
-![equation](http://www.sciweavers.org/tex2img.php?eq=1%2Bsin%28mc%5E2%29%0D%0A&bc=White&fc=Black&im=jpg&fs=12&ff=arev&edit=0)
+Example of usage:
+An integer programming problem has to be created:
+problem = IntegerProblem('max', f, [c1, c2], ['intensify', 2])
+which means that we are looking for the maximum of the function f:
+def f(x):
+  
