@@ -1,3 +1,4 @@
+# tabu_intprog
 <b>Python solver for integer programming problems using Tabu search.</b>
 
 <a href="https://github.com/farisca/tabu_intprog/blob/master/seminarski-tabu_integer.pdf?raw=true">Documentation (in Bosnian)</a>
