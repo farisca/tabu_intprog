@@ -35,7 +35,10 @@ The iterations are done by calling the ```next_iteration``` method:
 ```python
 while tabu_search.iteration < tabu_search.max_iter:
   tabu_search.next_iteration()
-  plt = tabu_search.plot([0, 9, 0, 6], 2, ['delay', 0.5])
 ```
-The last line enables the visualization of the search process and the result is the following graph where the optimum is marked in red and tabu solutions are circled:
+In the case of a 2-D problem, the line:
+```python
+tabu_search.plot([0, 9, 0, 6], 2, ['delay', 0.5])
+```
+can be added, which enables the visualization of the search process and the result is the following graph where the optimum is marked in red and tabu solutions are circled:
 ![alt tag width="100"](http://s3.postimg.org/6kgu9pdpv/tabu.png)
