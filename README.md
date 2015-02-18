@@ -38,4 +38,4 @@ while tabu_search.iteration < tabu_search.max_iter:
   plt = tabu_search.plot([0, 9, 0, 6], 2, ['delay', 0.5])
 ```
 The last line enables the visualization of the search process and the result is the following graph where the optimum is marked in red and tabu solutions are circled:
-![alt tag width=100](http://s3.postimg.org/6kgu9pdpv/tabu.png)
+![alt tag width="100"](http://s3.postimg.org/6kgu9pdpv/tabu.png)
