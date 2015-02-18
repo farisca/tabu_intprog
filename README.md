@@ -7,7 +7,7 @@ TabuSearch.py contains all the code.
 
 Example of usage:
 An integer programming problem has to be created:
-problem = IntegerProblem('max', f, [c1, c2], ['intensify', 2])
+<verbatim>problem = IntegerProblem('max', f, [c1, c2], ['intensify', 2])</verbatim>
 which means that we are looking for the maximum of the function f:
 def f(x):
   
