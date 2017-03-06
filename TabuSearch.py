@@ -1,12 +1,12 @@
-import math
 import itertools
+import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
-import numpy as np
 import time
 
 class IntegerProblem:
     def __init__(self, type, objective_function, initial_point, constraints):
-        if not(type == 'min' or type == 'max'):
+        if not (type == 'min' or type == 'max'):
             raise Exception("Type has to be min or max!")
         else:
             self.type = type
@@ -20,6 +20,7 @@ class IntegerProblem:
             self.best_point = initial_point
             self.fitness = self.objective_function(self.current_point)
             self.initial_point = initial_point
+
 
 class TabuItem:
     def __init__(self, point):
@@ -35,6 +36,7 @@ class TabuItem:
 
     def reduce_time(self):
         self.time = self.time - 1
+
 
 class TabuList:
     tabu_list = []
@@ -66,8 +68,8 @@ class TabuList:
         for i in range(0, len(self.tabu_list)):
             print(self.tabu_list[i].point)
 
-class RecentMemory:
 
+class RecentMemory:
     def __init__(self, iterations, dimensions, initial_point):
         self.num_iterations = iterations
         self.recent_list = [0 for i in range(0, dimensions)]
@@ -81,11 +83,12 @@ class RecentMemory:
             else:
                 self.recent_list[i] = 0
         self.previous_point = point
-        
+
+
 class LongTermMemory:
     def __init__(self, initial_point):
         self.frequency_list = [[[initial_point[i], 1]] for i in range(0, len(initial_point))]
-        
+
     def update(self, point):
         exists = False
         for i in range(0, len(point)):
@@ -97,12 +100,13 @@ class LongTermMemory:
                 self.frequency_list[i].append([point[i], 1])
             else:
                 self.frequency_list[i][position][1] += 1
-        
+
     def get(self, dimension, minimum_freq):
         for j in range(0, len(self.frequency_list[dimension])):
             if self.frequency_list[dimension][j][1] <= minimum_freq:
                 return self.frequency_list[dimension][j][0]
         return []
+
 
 class TabuSearch:
     intensify = False
@@ -124,7 +128,8 @@ class TabuSearch:
             self.added = 0
         if 'intensify' in options:
             self.intensify = True
-            self.recent_memory = RecentMemory(options[options.index('intensify') + 1], self.problem.dimension, self.problem.initial_point)
+            self.recent_memory = RecentMemory(options[options.index('intensify') + 1], self.problem.dimension,
+                                              self.problem.initial_point)
 
     def find_neighbourhood(self):
         neighbourhood = []
@@ -133,17 +138,23 @@ class TabuSearch:
         for i in range(0, self.problem.dimension):
             if self.intensify:
                 if self.recent_memory.recent_list[i] > self.recent_memory.num_iterations:
-                    changes.append([self.problem.current_point[i], self.problem.current_point[i], self.problem.current_point[i]])
+                    changes.append(
+                        [self.problem.current_point[i], self.problem.current_point[i], self.problem.current_point[i]])
                 else:
-                    changes.append([self.problem.current_point[i] - 1, self.problem.current_point[i], self.problem.current_point[i] + 1])
+                    changes.append([self.problem.current_point[i] - 1, self.problem.current_point[i],
+                                    self.problem.current_point[i] + 1])
             elif self.diversify and self.diversify_iterations <= self.iteration:
-                    if self.long_term_memory.get(i, self.minimum_freq) != [] and self.added < self.num_added:
-                        self.added += 1
-                        changes.append([self.long_term_memory.get(i, self.minimum_freq), self.long_term_memory.get(i, self.minimum_freq), self.long_term_memory.get(i, self.minimum_freq)])
-                    else:
-                        changes.append([self.problem.current_point[i] - 1, self.problem.current_point[i], self.problem.current_point[i] + 1])
+                if self.long_term_memory.get(i, self.minimum_freq) != [] and self.added < self.num_added:
+                    self.added += 1
+                    changes.append([self.long_term_memory.get(i, self.minimum_freq),
+                                    self.long_term_memory.get(i, self.minimum_freq),
+                                    self.long_term_memory.get(i, self.minimum_freq)])
+                else:
+                    changes.append([self.problem.current_point[i] - 1, self.problem.current_point[i],
+                                    self.problem.current_point[i] + 1])
             else:
-                changes.append([self.problem.current_point[i] - 1, self.problem.current_point[i], self.problem.current_point[i] + 1])
+                changes.append([self.problem.current_point[i] - 1, self.problem.current_point[i],
+                                self.problem.current_point[i] + 1])
         # Find neighbourhood
         for r in itertools.product(*changes):
             # Don't add the current point to the neighbourhood
@@ -186,7 +197,6 @@ class TabuSearch:
             self.long_term_memory.update(maximum_point)
         self.iteration += 1
 
-
     def plot(self, axis, line_weight, options):
         plt.ion()
         plt.cla()
@@ -198,7 +208,7 @@ class TabuSearch:
             for j in range(0, len(y_points)):
                 points.append([x_points[i], y_points[j]])
         points = self.find_accessible_neighbourhood(points)
-        a=[[1,1]]
+        a = [[1, 1]]
         p = plt.plot(*zip(*points), marker='o', color='k', ls='')
         tacka = [self.problem.current_point]
         tabus = []
@@ -216,25 +226,32 @@ class TabuSearch:
             time.sleep(options[options.index('delay') + 1])
         return plt
 
+
 def f(x):
-    return 5 * x[0] +  8 * x[1]
+    return 5 * x[0] + 8 * x[1]
+
 
 def c1(x):
     return x[0] + x[1] <= 6
 
+
 def c2(x):
     return 5 * x[0] + 9 * x[1] <= 45
+
 
 def c3(x):
     return x[0] >= 0 and x[1] >= 0
 
-a = IntegerProblem('max', f, [0,0], [c1, c2, c3])
 
-tabu_search = TabuSearch(a,12, [])
+a = IntegerProblem('max', f, [0, 0], [c1, c2, c3])
+
+tabu_search = TabuSearch(a, 12, [])
+filename_count = 0
 while tabu_search.iteration < tabu_search.max_iter:
     tabu_search.next_iteration()
     plt = tabu_search.plot([0, 9, 0, 6], 2, ['delay', 0.5])
-plt.show()
+    plt.savefig(str(filename_count) + '.png')
+    filename_count += 1
 print("Best solution:")
 print(tabu_search.problem.best_point)
 print("Objective function value:")
